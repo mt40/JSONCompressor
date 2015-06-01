@@ -1,0 +1,240 @@
+import java_cup.runtime.*; // defines the Symbol class
+
+// The generated scanner will return a Symbol for each token that it finds.
+// A Symbol contains an Object field named value; that field will be of type
+// TokenVal, defined below.
+//
+// A TokenVal object contains the line number on which the token occurs as
+// well as the number of the character on that line that starts the token.
+// Some tokens (e.g., literals) also include the value of the token.
+
+class TokenVal {
+  int linenum;
+  int charnum;
+  TokenVal(int l, int c) {
+    linenum = l;
+    charnum = c;
+  }
+}
+
+class NullTokenVal extends TokenVal {
+ // the value of null
+  Object val;
+  NullTokenVal(int l, int c) {
+    super(l,c);
+    val = null;
+  }
+}
+
+class BoolTokenVal extends TokenVal {
+ // the value of the boolean literal
+  boolean boolVal;
+  BoolTokenVal(int l, int c, boolean val) {
+    super(l,c);
+    boolVal = val;
+  }
+}
+
+class IntLitTokenVal extends TokenVal {
+ // the value of the integer literal
+  int intVal;
+  IntLitTokenVal(int l, int c, int val) {
+    super(l,c);
+    intVal = val;
+  }
+}
+
+class BadEscapedChar extends Exception {
+}
+
+//TokenVal for both STRINGLITERAL and ID
+class StringTokenVal extends TokenVal {
+  String strVal;
+
+  StringTokenVal(int l, int c, String s) {
+    super(l, c);
+    strVal = s;
+  }
+
+  //process string s and return a String with all the escaped characters expanded
+  //throws BadEscapedChar if a bad escaped character is found
+  public static String checkEscapedChars(String s) throws BadEscapedChar {
+    // index 0 is the opening quote, so don't include it.
+    int start = 1;
+    int slash = s.indexOf("\\");
+    String strVal = "";
+    while (slash != -1) {
+      strVal = strVal + s.substring(start, slash);
+
+      // if the slash is the last character in the string then we are done.
+      if (slash == s.length() - 1) throw new BadEscapedChar();
+
+      char c = s.charAt(slash + 1);
+      if (c == 'n') {
+        strVal = strVal + "\n";
+      } else if (c == 't') {
+        strVal = strVal + "\t";
+      } else if (c == '"') {
+        strVal = strVal + "\"";
+      } else if (c == '\\') {
+        strVal = strVal + "\\";
+      } else if (c == '\'') {
+        strVal = strVal + "'";
+      } else {
+        throw new BadEscapedChar();
+      }
+      start = slash + 2;
+      slash = s.indexOf("\\", slash + 2);
+    }
+    //the last character is the closing quote, so don't include.
+    if (start < s.length() - 1)
+      strVal = strVal + s.substring(start, s.length() - 1);
+    return strVal;
+  }
+}
+
+
+// The following class is used to keep track of the character number at which
+// the current token starts on its line.
+class CharNum {
+  static int num=1;
+}
+%%
+%implements java_cup.runtime.Scanner
+%function next_token
+%type java_cup.runtime.Symbol
+
+%eofval{
+return new Symbol(sym.EOF);
+%eofval}
+
+%line
+
+%%
+ 
+int { Symbol s = new Symbol(sym.INT, new TokenVal(yyline+1, CharNum.num));
+      CharNum.num += 3;
+      return s; }
+
+void { Symbol s = new Symbol(sym.VOID, new TokenVal(yyline+1, CharNum.num));
+       CharNum.num += 4;
+       return s; }
+
+"true" { Symbol s = new Symbol(sym.TRUELITERAL, new BoolTokenVal(yyline+1, CharNum.num, true));
+       CharNum.num += 4;
+       return s; }
+
+"false" { Symbol s = new Symbol(sym.FALSELITERAL, new BoolTokenVal(yyline+1, CharNum.num, false));
+       CharNum.num += 5;
+       return s; }
+
+"null" { Symbol s = new Symbol(sym.NULLLITERAL, new NullTokenVal(yyline+1, CharNum.num));
+       CharNum.num += 4;
+       return s; }
+
+"{" { Symbol s = new Symbol(sym.LCURLY, new TokenVal(yyline+1, CharNum.num));
+    CharNum.num += 1;
+    return s; }
+
+"}" { Symbol s = new Symbol(sym.RCURLY, new TokenVal(yyline+1, CharNum.num));
+    CharNum.num += 1;
+    return s; }
+
+"(" { Symbol s = new Symbol(sym.LPAREN, new TokenVal(yyline+1, CharNum.num));
+      CharNum.num += 1;
+      return s; }
+
+")" { Symbol s = new Symbol(sym.RPAREN, new TokenVal(yyline+1, CharNum.num));
+      CharNum.num += 1;
+      return s; }
+
+"[" { Symbol s = new Symbol(sym.LSQBRACKET, new TokenVal(yyline+1, CharNum.num));
+    CharNum.num += 1;
+    return s; }
+
+"]" { Symbol s = new Symbol(sym.RSQBRACKET, new TokenVal(yyline+1, CharNum.num));
+    CharNum.num += 1;
+    return s; }
+
+, { Symbol s = new Symbol(sym.COMMA, new TokenVal(yyline+1, CharNum.num));
+    CharNum.num += 1;
+    return s; }
+
+= { Symbol s = new Symbol(sym.ASSIGN, new TokenVal(yyline+1, CharNum.num));
+    CharNum.num += 1;
+    return s; }
+
+: { Symbol s = new Symbol(sym.COLON, new TokenVal(yyline+1, CharNum.num));
+    CharNum.num += 1;
+    return s; }    
+
+; { Symbol s = new Symbol(sym.SEMICOLON, new TokenVal(yyline+1, CharNum.num));
+    CharNum.num += 1;
+    return s; }
+
+"+" { Symbol s = new Symbol(sym.PLUS, new TokenVal(yyline+1, CharNum.num));
+      CharNum.num += 1;
+      return s; }
+
+- { Symbol s = new Symbol(sym.MINUS, new TokenVal(yyline+1, CharNum.num));
+    CharNum.num += 1;
+    return s; }
+
+"*" { Symbol s = new Symbol(sym.TIMES, new TokenVal(yyline+1, CharNum.num));
+      CharNum.num += 1;
+      return s; }
+
+/ { Symbol s = new Symbol(sym.DIVIDE, new TokenVal(yyline+1, CharNum.num));
+    CharNum.num += 1;
+    return s; }
+
+"%" { Symbol s = new Symbol(sym.PERCENT, new TokenVal(yyline+1, CharNum.num));
+      CharNum.num += 1;
+      return s; }
+
+[0-9]+ {
+   int val;
+   try {
+     val = (new Integer(yytext())).intValue();
+   } catch (NumberFormatException e) {
+     Errors.warn(yyline+1, CharNum.num, "integer literal too large; using max value");
+     val = Integer.MAX_VALUE;
+   }
+   Symbol s = new Symbol(sym.INTLITERAL, new IntLitTokenVal(yyline+1, CharNum.num, val));
+   CharNum.num += yytext().length();
+   return s;
+}
+
+[a-zA-Z_][a-zA-Z0-9_]* {
+    Symbol s = new Symbol(sym.ID, new StringTokenVal(yyline+1, CharNum.num, yytext()));
+    CharNum.num += yytext().length();
+    return s;
+}
+
+\"([^\\\"]|\\.)*\" {
+    try {
+      String str = StringTokenVal.checkEscapedChars(yytext());
+      //Symbol s = new Symbol(sym.STRINGLITERAL, new StringTokenVal(yyline+1, CharNum.num, str));
+      Symbol s = new Symbol(sym.STRINGLITERAL, new StringTokenVal(yyline+1, CharNum.num, yytext()));
+      CharNum.num += yytext().length();
+      return s;
+    } catch (BadEscapedChar e) {
+      Errors.fatal(yyline+1, CharNum.num, "ignoring string literal with bad escaped character");
+      CharNum.num += yytext().length();
+    }
+}
+
+\{([^\\\"\n]|\\.)*\} {
+    CharNum.num += yytext().length();
+}
+
+\n {CharNum.num = 1;}
+
+\r {CharNum.num = 1;}
+
+[\ \t]+  {CharNum.num += yytext().length(); }
+
+(\/\/|#).* { CharNum.num += yytext().length(); }
+
+. { Errors.fatal(yyline+1, CharNum.num, "ignoring illegal character: " + yytext());
+    CharNum.num++; }

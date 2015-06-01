@@ -1,0 +1,107 @@
+/**********************************************************************
+ Java CUP specification for a parser for C-- programs
+ **********************************************************************/
+
+import java_cup.runtime.*;
+import java.util.*;
+
+/* Redefine method syntax_error to give better error messages than just
+ * "Syntax error"
+ */
+parser code {:
+
+public void syntax_error(Symbol currToken) {
+    if (currToken.value == null) {
+       Errors.fatal(0,0, "Syntax error at end of file");
+    }
+    else {
+       Errors.fatal(((TokenVal)currToken.value).linenum,
+	            ((TokenVal)currToken.value).charnum,
+		    "Syntax error");
+    }
+    System.exit(-1);
+}
+:};
+
+
+/* Terminals (tokens returned by the scanner)*/
+
+terminal 	        INT;
+terminal 	        VOID;
+terminal 	        IF;
+terminal 	        ELSE;
+terminal 	        WHILE;
+terminal            FOR;
+terminal 	        RETURN;
+terminal StringTokenVal     ID;
+terminal IntLitTokenVal INTLITERAL;
+terminal StringTokenVal STRINGLITERAL;
+terminal BoolTokenVal         TRUELITERAL;
+terminal BoolTokenVal         FALSELITERAL;
+terminal NullTokenVal         NULLLITERAL;
+terminal 	        LCURLY;
+terminal 	        RCURLY;
+terminal 	        LSQBRACKET;
+terminal 	        RSQBRACKET;
+terminal 	        LPAREN;
+terminal 	        RPAREN;
+terminal 	        COMMA;
+terminal 	        ASSIGN;
+terminal 	        SEMICOLON;
+terminal          COLON;
+terminal 	        PLUS;
+terminal 	        MINUS;
+terminal 	        TIMES;
+terminal 	        DIVIDE;
+terminal          PERCENT;
+
+/* Nonterminals */
+non terminal Json           json;
+non terminal JsonObject     object;
+non terminal JsonPair       pair;
+non terminal LinkedList     pairList;
+non terminal JsonArray      array;
+non terminal JsonValue      val;
+non terminal LinkedList     valueList;
+
+precedence left PLUS, MINUS;
+precedence left TIMES, DIVIDE, PERCENT;
+precedence left LSQBRACKET;
+
+start with json;
+
+/*
+ * grammar with actions
+ *
+ */
+json ::= object: o {:RESULT = new Json(o); :}
+        | array: a {:RESULT = new Json(a); :}
+        ;
+
+object ::= LCURLY pair: p pairList: pl RCURLY {: pl.addFirst(p); RESULT = new JsonObject(pl); :}
+          | LCURLY RCURLY {: RESULT = new JsonObject(new LinkedList()); :} // empty
+          ;
+
+pair ::= STRINGLITERAL: s COLON val: v {: RESULT = new JsonPair(s.strVal, v); :}
+        ;
+
+pairList ::= COMMA pair: p pairList: pl {: pl.addFirst(p); RESULT = pl; :}
+          | /* epsilon */ {: RESULT = new LinkedList(); :}
+          ;
+
+array ::= LSQBRACKET val: v valueList: vl RSQBRACKET {: vl.addFirst(v); RESULT = new JsonArray(vl); :}
+        | LSQBRACKET RSQBRACKET {: RESULT = new JsonArray(new LinkedList()); :} // empty
+        ;
+
+val ::= STRINGLITERAL: s {: RESULT = new StringLit(s.linenum, s.charnum, s.strVal); :}
+        | INTLITERAL: i {: RESULT = new IntLit(i.linenum, i.charnum, i.intVal); :}
+        | object: o {: RESULT = new JsonObjectValue(o); :}
+        | array: o {: RESULT = new JsonArrayValue(o); :}
+        | TRUELITERAL: b {: RESULT = new BoolLit(b.linenum, b.charnum, true); :}
+        | FALSELITERAL: b {: RESULT = new BoolLit(b.linenum, b.charnum, false); :}
+        | NULLLITERAL: n {: RESULT = new NullLit(n.linenum, n.charnum); :}
+        ;
+
+valueList ::= COMMA val: v valueList: vl {: vl.addFirst(v); RESULT = vl; :}
+            | /* epsilon */ {: RESULT = new LinkedList(); :}
+            ;
