@@ -1,6 +1,7 @@
 {
 	"_id": "556bab8be01121efaa8840e5",
     "isActive": true,
+    "other" : null,
     "balance": "$3,281.64",
     "picture": "http://placehold.it/32x32",
     "age": 37.23243,

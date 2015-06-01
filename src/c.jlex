@@ -192,7 +192,7 @@ void { Symbol s = new Symbol(sym.VOID, new TokenVal(yyline+1, CharNum.num));
       CharNum.num += 1;
       return s; }
 
-[0-9]+(\.[0-9]+)? {
+[+-]?[0-9]+(\.[0-9]+)? {
    double val;
    try {
      val = Double.parseDouble(yytext());

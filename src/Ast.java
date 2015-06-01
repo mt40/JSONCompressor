@@ -55,7 +55,7 @@ class JsonObject extends Ast {
             pair.compile();
         }
 
-        System.out.println("Pairs = " + pairList.size());
+        //System.out.println("Pairs = " + pairList.size());
     }
 }
 
