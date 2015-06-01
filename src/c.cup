@@ -33,12 +33,12 @@ terminal 	        ELSE;
 terminal 	        WHILE;
 terminal            FOR;
 terminal 	        RETURN;
-terminal StringTokenVal     ID;
-terminal IntLitTokenVal INTLITERAL;
-terminal StringTokenVal STRINGLITERAL;
-terminal BoolTokenVal         TRUELITERAL;
-terminal BoolTokenVal         FALSELITERAL;
-terminal NullTokenVal         NULLLITERAL;
+terminal StringTokenVal   ID;
+terminal NumberTokenVal   NUMBERLITERAL;
+terminal StringTokenVal   STRINGLITERAL;
+terminal BoolTokenVal     TRUELITERAL;
+terminal BoolTokenVal     FALSELITERAL;
+terminal NullTokenVal     NULLLITERAL;
 terminal 	        LCURLY;
 terminal 	        RCURLY;
 terminal 	        LSQBRACKET;
@@ -94,7 +94,7 @@ array ::= LSQBRACKET val: v valueList: vl RSQBRACKET {: vl.addFirst(v); RESULT =
         ;
 
 val ::= STRINGLITERAL: s {: RESULT = new StringLit(s.linenum, s.charnum, s.strVal); :}
-        | INTLITERAL: i {: RESULT = new IntLit(i.linenum, i.charnum, i.intVal); :}
+        | NUMBERLITERAL: i {: RESULT = new NumberLit(i.linenum, i.charnum, i.numberVal); :}
         | object: o {: RESULT = new JsonObjectValue(o); :}
         | array: o {: RESULT = new JsonArrayValue(o); :}
         | TRUELITERAL: b {: RESULT = new BoolLit(b.linenum, b.charnum, true); :}

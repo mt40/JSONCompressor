@@ -120,16 +120,16 @@ abstract class JsonBasicValue extends JsonValue {
     }
 }
 
-class IntLit extends JsonBasicValue {
-    private int intVal;
+class NumberLit extends JsonBasicValue {
+    private double numberVal;
 
-    public IntLit(int lineNum, int charNum, int intVal) {
+    public NumberLit(int lineNum, int charNum, double numberVal) {
         super(lineNum, charNum);
-        this.intVal = intVal;
+        this.numberVal = numberVal;
     }
 
     public void compile() {
-        stringValue = Integer.toString(intVal);
+        stringValue = Double.toString(numberVal);
     }
 }
 

@@ -35,12 +35,12 @@ class BoolTokenVal extends TokenVal {
   }
 }
 
-class IntLitTokenVal extends TokenVal {
+class NumberTokenVal extends TokenVal {
  // the value of the integer literal
-  int intVal;
-  IntLitTokenVal(int l, int c, int val) {
+  double numberVal;
+  NumberTokenVal(int l, int c, double val) {
     super(l,c);
-    intVal = val;
+    numberVal = val;
   }
 }
 
@@ -192,15 +192,15 @@ void { Symbol s = new Symbol(sym.VOID, new TokenVal(yyline+1, CharNum.num));
       CharNum.num += 1;
       return s; }
 
-[0-9]+ {
-   int val;
+[0-9]+(\.[0-9]+)? {
+   double val;
    try {
-     val = (new Integer(yytext())).intValue();
+     val = Double.parseDouble(yytext());
    } catch (NumberFormatException e) {
-     Errors.warn(yyline+1, CharNum.num, "integer literal too large; using max value");
-     val = Integer.MAX_VALUE;
+     Errors.warn(yyline+1, CharNum.num, "number literal too large; using max value");
+     val = Double.MAX_VALUE;
    }
-   Symbol s = new Symbol(sym.INTLITERAL, new IntLitTokenVal(yyline+1, CharNum.num, val));
+   Symbol s = new Symbol(sym.NUMBERLITERAL, new NumberTokenVal(yyline+1, CharNum.num, val));
    CharNum.num += yytext().length();
    return s;
 }
