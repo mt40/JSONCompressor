@@ -4,20 +4,20 @@ import java_cup.runtime.*;
 public class JSONCompressor {
     public static void main(String[] args) throws IOException {
         // SimpleC file
-        String fileSimpleC = "";
-        if (args.length >= 1) {
-            fileSimpleC = args[0];
+        String fileJson = "";
+        if (args.length >= 2) {
+            fileJson = args[0];
         } else {
-            System.err.println("usage: JSONCompressor <JSON_file>");
+            System.err.println("usage: JSONCompressor <Input_file> <Output_file>");
             System.exit(-1);
         }
 
         // Open input file
         FileReader reader = null;
         try {
-            reader = new FileReader(fileSimpleC);
+            reader = new FileReader(fileJson);
         } catch (FileNotFoundException ex) {
-            System.err.println("File " + fileSimpleC + " not found!");
+            System.err.println("File " + fileJson + " not found!");
             System.exit(-1);
         }
 
@@ -26,6 +26,7 @@ public class JSONCompressor {
         Json program = null;
         try {
             program = (Json) P.parse().value;
+            program.outputFileName = args[1];
         } catch (Exception ex) {
             System.err.println("Exception occured during parse: " + ex);
             System.exit(-1);

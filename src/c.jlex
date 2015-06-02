@@ -89,6 +89,7 @@ class StringTokenVal extends TokenVal {
     //the last character is the closing quote, so don't include.
     if (start < s.length() - 1)
       strVal = strVal + s.substring(start, s.length() - 1);
+    //System.out.println(strVal);
     return strVal;
   }
 }
@@ -112,13 +113,6 @@ return new Symbol(sym.EOF);
 
 %%
  
-int { Symbol s = new Symbol(sym.INT, new TokenVal(yyline+1, CharNum.num));
-      CharNum.num += 3;
-      return s; }
-
-void { Symbol s = new Symbol(sym.VOID, new TokenVal(yyline+1, CharNum.num));
-       CharNum.num += 4;
-       return s; }
 
 "true" { Symbol s = new Symbol(sym.TRUELITERAL, new BoolTokenVal(yyline+1, CharNum.num, true));
        CharNum.num += 4;
@@ -205,17 +199,11 @@ void { Symbol s = new Symbol(sym.VOID, new TokenVal(yyline+1, CharNum.num));
    return s;
 }
 
-[a-zA-Z_][a-zA-Z0-9_]* {
-    Symbol s = new Symbol(sym.ID, new StringTokenVal(yyline+1, CharNum.num, yytext()));
-    CharNum.num += yytext().length();
-    return s;
-}
-
 \"([^\\\"]|\\.)*\" {
     try {
       String str = StringTokenVal.checkEscapedChars(yytext());
-      //Symbol s = new Symbol(sym.STRINGLITERAL, new StringTokenVal(yyline+1, CharNum.num, str));
-      Symbol s = new Symbol(sym.STRINGLITERAL, new StringTokenVal(yyline+1, CharNum.num, yytext()));
+      Symbol s = new Symbol(sym.STRINGLITERAL, new StringTokenVal(yyline+1, CharNum.num, str));
+      //Symbol s = new Symbol(sym.STRINGLITERAL, new StringTokenVal(yyline+1, CharNum.num, yytext()));
       CharNum.num += yytext().length();
       return s;
     } catch (BadEscapedChar e) {

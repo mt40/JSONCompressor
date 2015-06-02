@@ -25,15 +25,6 @@ public void syntax_error(Symbol currToken) {
 
 
 /* Terminals (tokens returned by the scanner)*/
-
-terminal 	        INT;
-terminal 	        VOID;
-terminal 	        IF;
-terminal 	        ELSE;
-terminal 	        WHILE;
-terminal            FOR;
-terminal 	        RETURN;
-terminal StringTokenVal   ID;
 terminal NumberTokenVal   NUMBERLITERAL;
 terminal StringTokenVal   STRINGLITERAL;
 terminal BoolTokenVal     TRUELITERAL;

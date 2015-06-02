@@ -1,36 +1,17 @@
-{
-	"_id": "556bab8be01121efaa8840e5",
-    "isActive": true,
-    "other" : null,
-    "balance": "$3,281.64",
-    "picture": "http://placehold.it/32x32",
-    "age": 37.23243,
-    "eyeColor": "blue",
-    "name": "Diaz Aguirre",
-    "gender": "male",
-    "address": "132 Holt Court, Cashtown, Rhode Island, 7680 \n",
-    "registered": "2014-07-10T23:00:25 -07:00",
-    "tags": [
-      "anim",
-      "nostrud",
-      "aliqua",
-      "esse",
-      "esse",
-      "dolore",
-      "Lorem"
-    ],
+
+  {
     "friends": [
       {
         "id": 0,
-        "name": "Houston Harding"
+        "name": "Doris George"
       },
       {
         "id": 1,
-        "name": "York Coffey"
+        "name": "Trudy Golden"
       },
       {
         "id": 2,
-        "name": "Rose Gutierrez"
+        "name": "Frazier Heath"
       }
     ]
-}
+  }
