@@ -1,17 +1,34 @@
-
-  {
-    "friends": [
-      {
-        "id": 0,
-        "name": "Doris George"
-      },
-      {
-        "id": 1,
-        "name": "Trudy Golden"
-      },
-      {
-        "id": 2,
-        "name": "Frazier Heath"
-      }
-    ]
-  }
+[
+    {
+        "name" : "thai",
+        "age" : 20,
+        "male" : true
+    },
+    {
+        "name" : "superman",
+        "age" : 30,
+        "male" : true,
+        "school" : "HCMUS"
+    },
+    {
+        "name" : "spoderman",
+        "male" : true
+    },
+    false,
+    {
+        "name" : "batgirl",
+        "age" : 30,
+        "male" : true,
+        "school" : "HCMUS",
+        "coordinates" : [
+            {
+                "x" : 1.12,
+                "y" : 4.0 
+            },
+            {
+                "x" : 3.2,
+                "y" : 10
+            }
+        ]
+    }
+]

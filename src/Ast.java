@@ -23,10 +23,10 @@ class SymbolTable {
     private Map<String, Boolean> keys;
 
     public SymbolTable() {
-        keys = new TreeMap<String, Boolean>();
+        keys = new LinkedHashMap<String, Boolean>();
     }
 
-    public SymbolTable(Map<String, Boolean> keyMap) {
+    public SymbolTable(LinkedHashMap<String, Boolean> keyMap) {
         keys = keyMap;
     }
 
@@ -38,6 +38,21 @@ class SymbolTable {
 
     public boolean contains(String key) {
         return keys.containsKey(key);
+    }
+
+    public int indexOf(String key) {
+        int index = 0;
+        for(String item : keys.keySet()) {
+            if(item.equals(key)) {
+                return index;
+            }
+            index++;
+        }
+        return -1;
+    }
+
+    public int size() {
+        return keys.size();
     }
 
     public JSONArray toJsonArray() {
@@ -55,58 +70,47 @@ class SymbolTable {
 // **********************************************************************
 abstract class Ast {
     protected SymbolTable table;
+
+    public abstract Object compile();
 }
 
 class Json extends Ast {
     public String outputFileName;
-    private LinkedList objects;
+    private Ast content;
 
     public Json(JsonObject obj) {
-        this.objects = new LinkedList();
-        objects.add(obj);
+        content = obj;
     }
 
     public Json(JsonArray array) {
-        this.objects = array.valueList;
+        content = array;
     }
 
     // Compile
-    public void compile() {
-        Map<String, Boolean> keyMap = new TreeMap<String, Boolean>(); // the value boolean is not used (I chose boolean to save space)
+    public Object compile() {
+        table = new SymbolTable();
+        content.table = table;
 
-        for(int i = 0; i < objects.size(); ++i) {
-            // convert JsonValue to JsonObject
-            if(objects.get(i) instanceof JsonObjectValue) {
-                objects.set(i, new JsonObject((JsonObjectValue)objects.get(i))); // replace
-            }
+        JSONArray result = new JSONArray();
+        Object compiledContent = content.compile();
 
-            JsonObject obj = (JsonObject)objects.get(i);    
+        //if(table.size() > 0) {
+            result.add(table.toJsonArray());
+        //}
 
-            // Get all keys in the document
-            for(int j = 0; j < obj.pairList.size(); ++j) {
-                JsonPair pair = (JsonPair)(obj.pairList.get(j));
-                if(!keyMap.containsKey(pair.key))
-                    keyMap.put(pair.key, true);
+        if(compiledContent instanceof LinkedList) {
+            LinkedList list = (LinkedList)compiledContent;
+            for(int i = 0; i < list.size(); ++i) {
+                result.add(list.get(i));
             }
         }
-
-        this.table = new SymbolTable(keyMap);
-
-        JSONArray complete = new JSONArray();
-        complete.add(table.toJsonArray()); // add key array first
-
-        // Then add array of values of each JSON object
-        for(int i = 0; i < objects.size(); ++i) {
-            JsonObject obj = (JsonObject)objects.get(i);
-            obj.table = this.table;
-            JSONArray result = obj.compile();
-
-            complete.add(result);
+        else {
+            result.add(compiledContent);
         }
 
-        String result = complete.toJSONString();
-        JsonWriter.writeToFile(outputFileName, result);
-        System.out.println("Objects = " + objects.size());
+        JsonWriter.writeToFile(outputFileName, result.toJSONString());
+
+        return null;
     }
 }
 
@@ -129,18 +133,18 @@ class JsonObject extends Ast {
 
         for(int i = 0; i < pairList.size(); ++i) {
             JsonPair pair = (JsonPair)pairList.get(i);
+
+            table.addKey(pair.key);
+
+            pair.table = table;
             Object compiledValue = pair.compile();
 
-            // table is not null only when we are gethering all keys in the document
-            // else we don't need to use table
-            if(table != null) {
-                if(table.contains(pair.key)) {
-                    values.add(compiledValue);
-                }
-                else {
-                    values.add(null);
-                }
-            }
+            int pos = table.indexOf(pair.key);
+            for(int j = 0; j < pos - i; ++j)
+                values.add(null);
+
+            values.add(compiledValue);
+            
         }
 
         return values;
@@ -161,6 +165,7 @@ class JsonPair extends Ast {
     }
 
     public Object compile() {
+        value.table = new SymbolTable(); // new scope
         Object compiledValue = value.compile();
         return compiledValue;
     }
@@ -176,11 +181,13 @@ class JsonArray extends Ast {
         this.valueList = valueList;
     }
 
-    public JSONArray compile() {
-        JSONArray complete = new JSONArray();
+    public LinkedList compile() {
+        LinkedList complete = new LinkedList();
 
         for(int i = 0; i < valueList.size(); ++i) {
             JsonValue value = (JsonValue)valueList.get(i);
+            value.table = table;
+
             Object result = value.compile();
 
             complete.add(result);
@@ -193,10 +200,8 @@ class JsonArray extends Ast {
 // **********************************************************************
 // JsonValue
 // **********************************************************************
-abstract class JsonValue {
+abstract class JsonValue extends Ast {
     protected String stringValue;
-
-    public abstract Object compile();
 }
 
 abstract class JsonBasicValue extends JsonValue {
@@ -300,6 +305,7 @@ class JsonObjectValue extends JsonValue {
     }
 
     public JSONArray compile() {
+        obj.table = table;
         return obj.compile();
     }
 }
@@ -311,9 +317,21 @@ class JsonArrayValue extends JsonValue {
         this.array = array;
     }
 
-    public JSONArray compile() {
+    public LinkedList compile() {
         //System.out.println(array.compile());
-        return array.compile();
+        table = new SymbolTable();
+        array.table = table;
+
+        LinkedList result = new LinkedList();
+        LinkedList compiledContent = array.compile();
+
+        //if(table.size() > 0) {
+            result.add(table.toJsonArray());
+        //}
+
+        result.addAll(compiledContent);
+
+        return result;
     }
 }
 
