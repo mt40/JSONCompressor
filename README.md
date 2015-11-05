@@ -4,7 +4,7 @@ A simple JSON compressor implemented using [JSON.hPack](https://github.com/WebRe
 # How to use
 Requirement: [Java](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 
-Open your Command line or Terminal:
+In the 'src' folder, type in your Command line (Windows) or Terminal(Linux, Mac):
 
 	run <INPUT_FILE> <OUTPUT_FILE>
 	
